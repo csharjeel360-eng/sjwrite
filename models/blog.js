@@ -9,7 +9,7 @@ const commentSchema = new mongoose.Schema({
 const blogSchema = new mongoose.Schema({
   title: { type: String, required: true },
   content: { type: String, required: true },
-  author: { type: String, default: 'By bolger team' },
+  author: { type: String, default: 'Created by sjwrite teams' },
   authorImage: { type: String }, // URL or base64
   blogImage: { type: String },   // URL or base64
   likes: { type: Number, default: 0 },
