@@ -1,3 +1,5 @@
+// Handle favicon.png requests to prevent 500 errors
+app.get('/favicon.png', (req, res) => res.status(204).end());
 // Handle favicon requests to prevent 500 errors
 app.get('/favicon.ico', (req, res) => res.status(204).end());
  import express from 'express';
