@@ -62,8 +62,8 @@ app.get('/api/health', (req, res) => {
 app.use('/api/blogs', blogRoutes);
 app.use('/api/admin', authRoutes);
 
-// 404 handler for undefined routes - FIXED THIS LINE
-app.use('/*', (req, res) => {
+// 404 handler for undefined routes - FIXED: Use a regular expression instead
+app.use(/^(?!\/api\/health|\/api\/blogs|\/api\/admin|\/$).*$/, (req, res) => {
   res.status(404).json({ 
     error: 'Route not found',
     path: req.originalUrl,
@@ -75,6 +75,26 @@ app.use('/*', (req, res) => {
       admin: 'POST /api/admin/login'
     }
   });
+});
+
+// Alternative simpler 404 handler - use this if the regex above is too complex
+// This should be placed after all other routes
+app.use((req, res) => {
+  // Check if this is an API route that should have been handled
+  if (req.originalUrl.startsWith('/api/')) {
+    res.status(404).json({ 
+      error: 'API endpoint not found',
+      path: req.originalUrl,
+      method: req.method
+    });
+  } else {
+    // For non-API routes, you might want to handle differently
+    res.status(404).json({ 
+      error: 'Route not found',
+      path: req.originalUrl,
+      message: 'This route does not exist on the server'
+    });
+  }
 });
 
 // Global error handling middleware
