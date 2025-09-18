@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import blogRoutes from './routes/blogRoutes.js';
 import authRoutes from './routes/authRoutes.js';
-import cors from 'cors';
 
 dotenv.config({ quiet: true });
 const app = express();
@@ -15,23 +14,25 @@ const allowedOrigins = [
   'https://www.sjwrites.com'
 ];
 
-// CORS configuration
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'), false);
-    }
-  },
-  credentials: true
-}));
+// MANUAL CORS MIDDLEWARE - More reliable than cors package
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Check if origin is allowed
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  }
 
-// ✅ FIXED: Use string pattern instead of just *
-app.options('/*', cors());
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  next();
+});
 
 // Handle favicon requests
 app.get('/favicon.png', (req, res) => res.status(204).end());
@@ -77,15 +78,6 @@ app.use((req, res) => {
 // Global error handling middleware
 app.use((error, req, res, next) => {
   console.error('Server Error:', error);
-  
-  // Handle CORS errors specifically
-  if (error.message === 'Not allowed by CORS') {
-    return res.status(403).json({ 
-      error: 'CORS error',
-      message: 'Origin not allowed'
-    });
-  }
-  
   res.status(error.status || 500).json({ 
     error: 'Internal server error',
     message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
