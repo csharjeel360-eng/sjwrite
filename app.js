@@ -1,3 +1,5 @@
+// Handle favicon requests to prevent 500 errors
+app.get('/favicon.ico', (req, res) => res.status(204).end());
  import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
