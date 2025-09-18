@@ -58,6 +58,8 @@ app.get('/api/health', (req, res) => {
 app.use('/api/blogs', blogRoutes);
 app.use('/api/admin', authRoutes);
 
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // 404 handler for undefined routes
 app.use('*', (req, res) => {
   res.status(404).json({ 
@@ -128,5 +130,4 @@ server.on('error', (error) => {
   }
   process.exit(1);
 });
-
-export default app;
+ export default app;
