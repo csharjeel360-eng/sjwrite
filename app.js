@@ -15,7 +15,7 @@ const allowedOrigins = [
   'https://www.sjwrites.com'
 ];
 
-// SIMPLIFIED CORS configuration - This works better on Vercel
+// CORS configuration
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps, curl requests)
@@ -30,8 +30,8 @@ app.use(cors({
   credentials: true
 }));
 
-// Handle preflight requests for ALL routes
-app.options('*', cors());
+// ✅ FIXED: Use string pattern instead of just *
+app.options('/*', cors());
 
 // Handle favicon requests
 app.get('/favicon.png', (req, res) => res.status(204).end());
