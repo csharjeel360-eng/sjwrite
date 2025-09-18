@@ -1,7 +1,4 @@
-// Handle favicon.png requests to prevent 500 errors
-app.get('/favicon.png', (req, res) => res.status(204).end());
-// Handle favicon requests to prevent 500 errors
-app.get('/favicon.ico', (req, res) => res.status(204).end());
+ 
  import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -12,6 +9,10 @@ import cors from 'cors';
 dotenv.config({ quiet: true });
 const app = express();
 
+// Handle favicon.png requests to prevent 500 errors
+app.get('/favicon.png', (req, res) => res.status(204).end());
+// Handle favicon requests to prevent 500 errors
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 // Array of allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
