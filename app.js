@@ -41,6 +41,31 @@ app.options('*', (req, res) => {
   res.status(200).send();
 });
 
+// TEMPORARY: Redirect routes for old frontend URLs
+app.options('/admin/login', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || allowedOrigins[0]);
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  res.status(200).send();
+});
+
+app.options('/admin/register', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || allowedOrigins[0]);
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  res.status(200).send();
+});
+
+app.post('/admin/login', (req, res) => {
+  res.redirect(307, '/api/admin/login');
+});
+
+app.post('/admin/register', (req, res) => {
+  res.redirect(307, '/api/admin/register');
+});
+
 // Handle favicon requests to prevent 500 errors
 app.get('/favicon.png', (req, res) => res.status(204).end());
 app.get('/favicon.ico', (req, res) => res.status(204).end());
@@ -134,7 +159,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// Handle server errors
+ // Handle server errors
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
     console.error(`Port ${PORT} is already in use`);
@@ -143,5 +168,3 @@ server.on('error', (error) => {
   }
   process.exit(1);
 });
-
-export default app;
