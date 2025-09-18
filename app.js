@@ -8,10 +8,6 @@ import cors from 'cors';
 dotenv.config({ quiet: true });
 const app = express();
 
-// Handle favicon requests to prevent 500 errors
-app.get('/favicon.png', (req, res) => res.status(204).end());
-app.get('/favicon.ico', (req, res) => res.status(204).end());
-
 // Array of allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
@@ -19,7 +15,7 @@ const allowedOrigins = [
   'https://www.sjwrites.com'
 ];
 
-// CORS configuration
+// Enhanced CORS configuration - MUST come first
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps, curl requests)
@@ -31,8 +27,23 @@ app.use(cors({
     }
     return callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
+
+// EXPLICITLY handle OPTIONS requests for all routes - CRUCIAL FIX
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || allowedOrigins[0]);
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  res.status(200).send();
+});
+
+// Handle favicon requests to prevent 500 errors
+app.get('/favicon.png', (req, res) => res.status(204).end());
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 app.use(express.json());
 
@@ -62,9 +73,8 @@ app.get('/api/health', (req, res) => {
 app.use('/api/blogs', blogRoutes);
 app.use('/api/admin', authRoutes);
 
-// SIMPLIFIED 404 handler - REMOVE the regex version and use this instead
-// This should be the LAST middleware (after all routes)
-app.use((req, res, next) => {
+// 404 handler - This should be the LAST middleware (after all routes)
+app.use((req, res) => {
   res.status(404).json({ 
     error: 'Route not found',
     path: req.originalUrl,
