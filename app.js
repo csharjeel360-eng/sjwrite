@@ -1,4 +1,3 @@
- 
  import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
@@ -9,10 +8,10 @@ import cors from 'cors';
 dotenv.config({ quiet: true });
 const app = express();
 
-// Handle favicon.png requests to prevent 500 errors
-app.get('/favicon.png', (req, res) => res.status(204).end());
 // Handle favicon requests to prevent 500 errors
+app.get('/favicon.png', (req, res) => res.status(204).end());
 app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // Array of allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
@@ -63,10 +62,8 @@ app.get('/api/health', (req, res) => {
 app.use('/api/blogs', blogRoutes);
 app.use('/api/admin', authRoutes);
 
-app.get('/favicon.ico', (req, res) => res.status(204).end());
-
-// 404 handler for undefined routes
-app.use('*', (req, res) => {
+// 404 handler for undefined routes - FIXED THIS LINE
+app.use('/*', (req, res) => {
   res.status(404).json({ 
     error: 'Route not found',
     path: req.originalUrl,
@@ -135,4 +132,5 @@ server.on('error', (error) => {
   }
   process.exit(1);
 });
- export default app;
+
+export default app;
