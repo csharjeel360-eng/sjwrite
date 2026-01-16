@@ -8,36 +8,7 @@ import Blog from '../models/blog.js';
 import protect from '../middleware/authMiddleware.js';
 const router = express.Router();
 
-// ✅ Public: Get all blogs with optional tag filtering
-router.get('/', async (req, res) => {
-  try {
-    const { tag } = req.query;
-    let filter = {};
-    
-    if (tag) {
-      filter.tags = { $in: [tag.toLowerCase()] };
-    }
-    
-    const blogs = await Blog.find(filter).sort({ createdAt: -1 });
-    res.json(blogs);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// ✅ Public: Get single blog
-router.get('/:id', async (req, res) => {
-  try {
-    const blog = await Blog.findById(req.params.id);
-    if (!blog) {
-      return res.status(404).json({ error: 'Blog not found' });
-    }
-    res.json(blog);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
+// ⚠️ CRITICAL: Special routes MUST come BEFORE /:id route!
 // ✅ Public: Search blogs
 router.get('/search', async (req, res) => {
   try {
@@ -79,6 +50,35 @@ router.get('/sort', async (req, res) => {
   }
 });
 
+// ✅ Public: Get all unique tags
+router.get('/tags/all', async (req, res) => {
+  try {
+    const tags = await Blog.distinct('tags');
+    res.json(tags);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ✅ Public: Get popular tags (tags with most blogs)
+router.get('/tags/popular', async (req, res) => {
+  try {
+    const popularTags = await Blog.aggregate([
+      { $unwind: '$tags' },
+      { $group: { 
+        _id: '$tags', 
+        count: { $sum: 1 } 
+      }},
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+    
+    res.json(popularTags);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ✅ Public: Get blogs by tag
 router.get('/tag/:tag', async (req, res) => {
   try {
@@ -87,6 +87,37 @@ router.get('/tag/:tag', async (req, res) => {
       tags: { $in: [tag.toLowerCase()] } 
     }).sort({ createdAt: -1 });
     res.json(blogs);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ✅ NOW general routes after specific ones
+// ✅ Public: Get all blogs with optional tag filtering
+router.get('/', async (req, res) => {
+  try {
+    const { tag } = req.query;
+    let filter = {};
+    
+    if (tag) {
+      filter.tags = { $in: [tag.toLowerCase()] };
+    }
+    
+    const blogs = await Blog.find(filter).sort({ createdAt: -1 });
+    res.json(blogs);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ✅ Public: Get single blog
+router.get('/:id', async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+    res.json(blog);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
