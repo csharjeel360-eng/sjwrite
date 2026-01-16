@@ -9,6 +9,26 @@ import protect from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 // ⚠️ CRITICAL: Special routes MUST come BEFORE /:id route!
+// ✅ Public: Get all blogs with optional tag filtering
+router.get('/', async (req, res) => {
+  try {
+    const { tag } = req.query;
+    let filter = {};
+    
+    if (tag) {
+      filter.tags = { $in: [tag.toLowerCase()] };
+      console.log('Filtering blogs by tag:', tag.toLowerCase());
+    }
+    
+    const blogs = await Blog.find(filter).sort({ createdAt: -1 });
+    console.log(`GET /api/blogs${tag ? `?tag=${tag}` : ''} - Found ${blogs.length} blogs`);
+    res.json(blogs);
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ✅ Public: Search blogs
 router.get('/search', async (req, res) => {
   try {
@@ -25,8 +45,10 @@ router.get('/search', async (req, res) => {
         { tags: { $in: [regex] } }
       ] 
     });
+    console.log(`GET /api/blogs/search?q=${q} - Found ${blogs.length} blogs`);
     res.json(blogs);
   } catch (error) {
+    console.error('Search error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
