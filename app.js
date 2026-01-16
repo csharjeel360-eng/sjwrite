@@ -10,30 +10,42 @@ const app = express();
 // Array of allowed origins
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:3000',
   'https://sjwrites.com',
-  'https://www.sjwrites.com'
+  'https://www.sjwrites.com',
+  'https://sjwrites-clint.vercel.app',
+  'https://sjwrites-client.vercel.app'
 ];
 
-// CORS MIDDLEWARE - Handle all domain variants
+// AGGRESSIVE CORS MIDDLEWARE - Force headers, prevent caching
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   
-  // Always set these headers for CORS preflight and actual requests
+  // Force cache-control headers to prevent 304 responses
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  
+  // CORS headers - always set them
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, Content-Type, Authorization, Accept, X-Requested-With');
   
-  // Check if origin is allowed
+  // Set Allow-Origin header
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
+    console.log('✓ CORS allowed for:', origin);
   } else if (origin) {
-    // Log unexpected origins for debugging
-    console.warn('CORS blocked origin:', origin, 'Allowed:', allowedOrigins);
+    // TEMPORARY: Log all requests to debug
+    console.warn('CORS check - Origin:', origin, 'Allowed list:', allowedOrigins);
+    // For debugging - reject but log
+    console.warn('CORS would be blocked for:', origin);
   }
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
   next();
