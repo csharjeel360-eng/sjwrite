@@ -14,17 +14,22 @@ const allowedOrigins = [
   'https://www.sjwrites.com'
 ];
 
-// MANUAL CORS MIDDLEWARE - More reliable than cors package
+// IMPROVED CORS MIDDLEWARE - Handle both www and non-www
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   
   // Check if origin is allowed
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  } else if (origin) {
+    // Log unexpected origins for debugging
+    console.warn('CORS blocked origin:', origin);
   }
+  
+  // Always set these headers for allowed requests
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
