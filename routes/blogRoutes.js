@@ -302,6 +302,13 @@ router.post('/:id/upload-image', protect, upload.single('image'), async (req, re
     
     // Update the specific image field
     blog[imageType] = req.file.path;
+    // If an alt text was provided, update the corresponding alt field
+    const providedAlt = req.body.imageAlt;
+    if (imageType === 'blogImage') {
+      if (providedAlt) blog.blogImageAlt = providedAlt;
+    } else if (imageType === 'authorImage') {
+      if (providedAlt) blog.authorImageAlt = providedAlt;
+    }
     await blog.save();
     
     res.json({ 

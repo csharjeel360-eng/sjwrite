@@ -12,6 +12,8 @@ const blogSchema = new mongoose.Schema({
   author: { type: String, default: 'by Team SJWrites' },
   authorImage: { type: String }, // URL or base64
   blogImage: { type: String },   // URL or base64
+  blogImageAlt: { type: String }, // Alt text for main feature image
+  authorImageAlt: { type: String }, // Alt text for author image
   likes: { type: Number, default: 0 },
   comments: [commentSchema],
   tags: [String], // Added tags field as an array of strings
