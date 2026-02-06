@@ -15,6 +15,8 @@ const blogSchema = new mongoose.Schema({
   likes: { type: Number, default: 0 },
   comments: [commentSchema],
   tags: [String], // Added tags field as an array of strings
+  metaTitle: { type: String }, // Meta title for SEO
+  metaDescription: { type: String }, // Meta description for SEO
   createdAt: { type: Date, default: Date.now },
   views: { type: Number, default: 0 } // Track blog views
 });
