@@ -19,8 +19,13 @@ router.post('/register', async (req, res) => {
     const newAdmin = new Admin({ username, password });
     await newAdmin.save();
 
-    // Generate token
-    const token = jwt.sign({ id: newAdmin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // Generate token (7 days)
+    const token = jwt.sign({ id: newAdmin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    // Save active token and last login to enforce single-session
+    newAdmin.activeToken = token;
+    newAdmin.lastLogin = new Date();
+    await newAdmin.save();
 
     res.status(201).json({ message: 'Admin registered successfully', token });
   } catch (err) {
@@ -39,14 +44,19 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    // Check password using model helper
+    const isPasswordValid = await admin.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Generate token
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // Generate token (7 days)
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    // Save active token and update last login - this invalidates any previous token
+    admin.activeToken = token;
+    admin.lastLogin = new Date();
+    await admin.save();
 
     res.json({ message: 'Login successful', token });
   } catch (err) {

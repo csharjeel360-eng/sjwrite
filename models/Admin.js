@@ -30,6 +30,10 @@ const adminSchema = new mongoose.Schema({
     type: Date,
     default: null
   },
+  activeToken: {
+    type: String,
+    default: null
+  },
   role: {
     type: String,
     enum: ['superadmin', 'admin', 'moderator'],
